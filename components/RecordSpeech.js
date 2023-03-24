@@ -43,7 +43,8 @@ const RecordSpeech = () => {
       body: formData,
     });
 
-    // Do something with the response
+    const data = await response.json();
+    console.log(data.text);
   };
 
   return (
