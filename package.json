@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "install-legacy-deps": "npm install --legacy-peer-deps"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.5.1",
@@ -20,10 +21,5 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-mic": "^12.4.6"
-  },
-  "overrides": {
-    "next-auth": {
-      "next": "13.0.0"
-    }
   }
 }
