@@ -1,9 +1,56 @@
+import { Flex, Box, Image, Text, SlideFade, Stack } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
+import { ReactMic } from 'react-mic';
+
+const MicWithImage = ({ isRecording, startRecording, stopRecording }) => {
+  return (
+    <Box position='relative' display='inline-block'>
+      <ReactMic
+        record={isRecording}
+        className='sound-wave'
+        strokeColor='#4ad295'
+        backgroundColor='#ffffff'
+      />
+      {!isRecording && (
+        <Image
+          src='microphone.png' // Replace with the path to your image
+          alt='Image description' // Replace with a description of the image
+          width='80px' // Adjust the width as needed
+          height='80px' // Adjust the height as needed
+          position='absolute'
+          top='50%'
+          left='50%'
+          transform='translate(-50%, -50%)'
+          objectFit='contain'
+          zIndex='1'
+          onClick={startRecording}
+        />
+      )}
+      {isRecording && (
+        <Image
+          src='stop.png' // Replace with the path to your image
+          alt='Image description' // Replace with a description of the image
+          width='80px' // Adjust the width as needed
+          height='80px' // Adjust the height as needed
+          position='absolute'
+          top='50%'
+          left='50%'
+          transform='translate(-50%, -50%)'
+          objectFit='contain'
+          zIndex='1'
+          onClick={stopRecording}
+        />
+      )}
+    </Box>
+  );
+};
 
 const RecordSpeech = () => {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
   const [audioBlob, setAudioBlob] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [textResponse, setTextResponse] = useState('');
 
   const startRecording = async () => {
     setIsRecording(true);
@@ -25,12 +72,8 @@ const RecordSpeech = () => {
     mediaRecorder.start();
   };
 
-  const stopRecording = () => {
-    setIsRecording(false);
-    mediaRecorderRef.current.stop();
-  };
-
-  const uploadAudio = async () => {
+  const uploadAudio = async (audioBlob) => {
+    setIsProcessing(true);
     const formData = new FormData();
     formData.append(
       'file',
@@ -45,20 +88,40 @@ const RecordSpeech = () => {
 
     const data = await response.json();
     console.log(data.text);
+    setTextResponse(data.text);
+    setIsProcessing(false);
+  };
+
+  const stopRecording = () => {
+    setIsRecording(false);
+    mediaRecorderRef.current.stop();
+    mediaRecorderRef.current.addEventListener('dataavailable', (event) => {
+      uploadAudio(event.data);
+    });
   };
 
   return (
-    <div>
-      <button onClick={startRecording} disabled={isRecording}>
-        Record
-      </button>
-      <button onClick={stopRecording} disabled={!isRecording}>
-        Stop
-      </button>
-      <button onClick={uploadAudio} disabled={!audioBlob}>
-        Upload
-      </button>
-    </div>
+    <Stack
+      minW={'100vw'}
+      alignItems='center'
+      justify={'center'}
+      spacing={4}
+      minH={'100vh'}
+    >
+      <SlideFade in={textResponse !== ''} offsetY='20px'>
+        <Box w='80vw' h='40vh' bgColor={'gray.200'} p={4} borderRadius='lg'>
+          <Text>{textResponse}</Text>
+        </Box>
+      </SlideFade>
+      <MicWithImage
+        isRecording={isRecording}
+        startRecording={startRecording}
+        stopRecording={stopRecording}
+      />
+      <Text visibility={isProcessing ? 'visible' : 'hidden'}>
+        Processing...
+      </Text>
+    </Stack>
   );
 };
 
