@@ -74,22 +74,31 @@ const RecordSpeech = () => {
 
   const uploadAudio = async (audioBlob) => {
     setIsProcessing(true);
-    const formData = new FormData();
-    formData.append(
-      'file',
-      new Blob([audioBlob], { type: 'audio/wav' }),
-      'audio.wav'
-    );
 
-    const response = await fetch('/api/whisper', {
-      method: 'POST',
-      body: formData,
-    });
+    try {
+      const formData = new FormData();
+      formData.append(
+        'file',
+        new Blob([audioBlob], { type: 'audio/wav' }),
+        'audio.wav'
+      );
 
-    const data = await response.json();
-    console.log(data.text);
-    setTextResponse(data.text);
-    setIsProcessing(false);
+      const response = await fetch('/api/whisper', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        console.error(`API error: ${response.status} ${response.statusText}`);
+        return;
+      }
+
+      const data = await response.json();
+      setTextResponse(data.text);
+      setIsProcessing(false);
+    } catch (error) {
+      console.error('Error during uploadAudio:', error);
+    }
   };
 
   const stopRecording = () => {
