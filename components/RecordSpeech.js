@@ -1,6 +1,7 @@
 import { Flex, Box, Image, Text, SlideFade, Stack } from '@chakra-ui/react';
 import { useState, useRef } from 'react';
 import { ReactMic } from 'react-mic';
+import PageCenter from './PageCenter';
 
 const MicWithImage = ({ isRecording, startRecording, stopRecording }) => {
   return (
@@ -110,27 +111,38 @@ const RecordSpeech = () => {
   };
 
   return (
-    <Stack
-      minW={'100vw'}
-      alignItems='center'
-      justify={'center'}
-      spacing={4}
-      minH={'100vh'}
-    >
-      <SlideFade in={textResponse !== ''} offsetY='20px'>
-        <Box w='80vw' h='40vh' bgColor={'gray.200'} p={4} borderRadius='lg'>
-          <Text>{textResponse}</Text>
-        </Box>
-      </SlideFade>
-      <MicWithImage
-        isRecording={isRecording}
-        startRecording={startRecording}
-        stopRecording={stopRecording}
-      />
-      <Text visibility={isProcessing ? 'visible' : 'hidden'}>
-        Processing...
-      </Text>
-    </Stack>
+    <Box w={'100vw'} h={'100vh'} margin='0' padding='0'>
+      <PageCenter>
+        <Stack
+          height='100%'
+          width='100%'
+          alignItems='center'
+          justify={'center'}
+          spacing={4}
+        >
+          <SlideFade in={textResponse !== ''} offsetY='20px'>
+            <Box
+              w='80vw'
+              h='40vh'
+              bgColor={'gray.200'}
+              p={4}
+              borderRadius='lg'
+              overflowY='auto'
+            >
+              <Text>{textResponse}</Text>
+            </Box>
+          </SlideFade>
+          <MicWithImage
+            isRecording={isRecording}
+            startRecording={startRecording}
+            stopRecording={stopRecording}
+          />
+          <Text visibility={isProcessing ? 'visible' : 'hidden'}>
+            Processing...
+          </Text>
+        </Stack>
+      </PageCenter>
+    </Box>
   );
 };
 
