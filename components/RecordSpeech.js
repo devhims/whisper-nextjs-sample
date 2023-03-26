@@ -1,13 +1,10 @@
 import {
-  Flex,
   Box,
-  Image,
   Text,
   SlideFade,
   Stack,
   Heading,
   VStack,
-  Tooltip,
   Link,
   HStack,
   useClipboard,
@@ -16,71 +13,18 @@ import {
 } from '@chakra-ui/react';
 
 import { CopyIcon, DeleteIcon } from '@chakra-ui/icons';
-
 import { useState, useRef } from 'react';
-import { ReactMic } from 'react-mic';
-import PageCenter from './PageCenter';
 
-const MicWithImage = ({ isRecording, startRecording, stopRecording }) => {
-  return (
-    <Box position='relative' display='inline-block'>
-      <ReactMic
-        record={isRecording}
-        className='sound-wave'
-        strokeColor='#4ad295'
-        backgroundColor='#ffffff'
-      />
-      {!isRecording && (
-        <Tooltip
-          hasArrow
-          label='Click to begin recording'
-          aria-label='tooltip'
-          bg='#4ad295'
-        >
-          <Image
-            src='microphone.png' // Replace with the path to your image
-            alt='Image description' // Replace with a description of the image
-            width='80px' // Adjust the width as needed
-            height='80px' // Adjust the height as needed
-            position='absolute'
-            top='50%'
-            left='50%'
-            transform='translate(-50%, -50%)'
-            objectFit='contain'
-            zIndex='1'
-            onClick={startRecording}
-            _hover={{ cursor: 'pointer' }}
-          />
-        </Tooltip>
-      )}
-      {isRecording && (
-        <Image
-          src='stop.png' // Replace with the path to your image
-          alt='Image description' // Replace with a description of the image
-          width='80px' // Adjust the width as needed
-          height='80px' // Adjust the height as needed
-          position='absolute'
-          top='50%'
-          left='50%'
-          transform='translate(-50%, -50%)'
-          objectFit='contain'
-          zIndex='1'
-          onClick={stopRecording}
-          _hover={{ cursor: 'pointer' }}
-        />
-      )}
-    </Box>
-  );
-};
+import Recorder from './Recorder';
+import PageCenter from './PageCenter';
 
 const RecordSpeech = () => {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
-  const [audioBlob, setAudioBlob] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [textResponse, setTextResponse] = useState('');
 
-  const { onCopy, hasCopied } = useClipboard(textResponse);
+  const { onCopy } = useClipboard(textResponse);
   const toast = useToast();
 
   const copyText = () => {
@@ -96,20 +40,8 @@ const RecordSpeech = () => {
 
   const startRecording = async () => {
     setIsRecording(true);
-
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
     const mediaRecorder = new MediaRecorder(stream);
-
-    mediaRecorder.addEventListener('dataavailable', (event) => {
-      setAudioBlob(event.data);
-    });
-
-    mediaRecorder.addEventListener('stop', () => {
-      setIsRecording(false);
-      mediaRecorderRef.current = null;
-    });
-
     mediaRecorderRef.current = mediaRecorder;
     mediaRecorder.start();
   };
@@ -172,8 +104,6 @@ const RecordSpeech = () => {
             </Heading>
             <Heading
               fontSize='md'
-              // bgGradient='linear(to-r, teal.600, teal.400, teal.300, teal.400)'
-              // bgClip='text'
               color={'gray.600'}
               letterSpacing='tight'
               mb='2'
@@ -207,7 +137,7 @@ const RecordSpeech = () => {
               />
             </HStack>
           </SlideFade>
-          <MicWithImage
+          <Recorder
             isRecording={isRecording}
             startRecording={startRecording}
             stopRecording={stopRecording}
