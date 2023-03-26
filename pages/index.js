@@ -6,5 +6,17 @@ const DynamicRecordSpeech = dynamic(() => import('@/components/RecordSpeech'), {
 });
 
 export default function Home() {
-  return <DynamicRecordSpeech />;
+  return (
+    <>
+      <Head>
+        <title>Whisper: Speech to Text</title>
+        <meta
+          name='description'
+          content='Sample project showcasing setup of whisper api in a next.js project for speech to text conversion'
+        />
+        <link rel='icon' href='/favicon.ico' />
+      </Head>
+      <DynamicRecordSpeech />
+    </>
+  );
 }
