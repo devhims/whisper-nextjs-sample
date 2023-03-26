@@ -152,7 +152,7 @@ const RecordSpeech = () => {
   };
 
   return (
-    <Box w={'100vw'} h={'100vh'} margin='0' padding='0' overflowY='auto'>
+    <Box w={'100vw'} h='auto' margin='0' padding='0' overflowY='auto'>
       <PageCenter>
         <Stack
           height='100%'
@@ -186,7 +186,7 @@ const RecordSpeech = () => {
           <SlideFade in={textResponse !== ''} offsetY='20px'>
             <Box
               w='80vw'
-              h='30vh'
+              h='20vh'
               bgColor={'gray.200'}
               p={4}
               borderRadius='lg'
