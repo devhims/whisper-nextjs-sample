@@ -17,15 +17,19 @@ export default withFileUpload(async (req, res) => {
   const formData = new FormData();
   formData.append('file', createReadStream(file.filepath), 'audio.wav');
   formData.append('model', 'whisper-1');
+  formData.append('prompt', 'the recorded audio is in english or hindi');
 
-  const response = await fetch('https://api.openai.com/v1/audio/translations', {
-    method: 'POST',
-    headers: {
-      ...formData.getHeaders(),
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-    },
-    body: formData,
-  });
+  const response = await fetch(
+    'https://api.openai.com/v1/audio/transcriptions',
+    {
+      method: 'POST',
+      headers: {
+        ...formData.getHeaders(),
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: formData,
+    }
+  );
 
   const { text, error } = await response.json();
   if (response.ok) {
