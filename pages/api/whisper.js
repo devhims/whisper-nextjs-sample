@@ -11,6 +11,7 @@ export const config = {
 export default withFileUpload(async (req, res) => {
   const file = req.file;
   if (!file) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(400).send('No file uploaded');
     return;
   }
@@ -33,6 +34,7 @@ export default withFileUpload(async (req, res) => {
 
   const { text, error } = await response.json();
   if (response.ok) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).json({ text: text });
   } else {
     console.log('OPEN AI ERROR:');
