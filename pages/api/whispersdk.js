@@ -1,12 +1,19 @@
 const FormData = require('form-data');
 import { withFileUpload } from 'next-multiparty';
 import { createReadStream } from 'fs';
+import { Configuration, OpenAIApi } from 'openai';
 
 export const config = {
   api: {
     bodyParser: false,
   },
 };
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const openai = new OpenAIApi(configuration);
 
 export default withFileUpload(async (req, res) => {
   const file = req.file;
@@ -15,22 +22,14 @@ export default withFileUpload(async (req, res) => {
     res.status(400).send('No file uploaded');
     return;
   }
-  const formData = new FormData();
-  formData.append('file', createReadStream(file.filepath), 'audio.wav');
-  formData.append('model', 'whisper-1');
-  formData.append('language', 'en');
-  formData.append('prompt', 'the recorded audio is in english or hindi');
-
-  const response = await fetch(
-    'https://api.openai.com/v1/audio/transcriptions',
-    {
-      method: 'POST',
-      headers: {
-        ...formData.getHeaders(),
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: formData,
-    }
+  //   const formData = new FormData();
+  //   formData.append('file', createReadStream(file.filepath), 'audio.wav');
+  //   formData.append('model', 'whisper-1');
+  //   formData.append('prompt', 'the recorded audio is in english or hindi');
+  console.log('filepath', file.filepath);
+  const response = await openai.createTranscription(
+    createReadStream(file.filepath, 'audio.wav'),
+    'whisper-1'
   );
 
   const { text, error } = await response.json();
