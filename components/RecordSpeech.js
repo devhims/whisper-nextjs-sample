@@ -18,11 +18,24 @@ import { useState, useRef } from 'react';
 import Recorder from './Recorder';
 import PageCenter from './PageCenter';
 
+import audioBufferToWav from 'audiobuffer-to-wav';
+
+const isSafari = () => {
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+};
+
+const blobToAudioBuffer = async (blob) => {
+  const arrayBuffer = await blob.arrayBuffer();
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  return await audioContext.decodeAudioData(arrayBuffer);
+};
+
 const RecordSpeech = () => {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [textResponse, setTextResponse] = useState('');
+  const [audioDuration, setAudioDuration] = useState(0);
 
   const { onCopy } = useClipboard(textResponse);
   const toast = useToast();
@@ -41,7 +54,9 @@ const RecordSpeech = () => {
   const startRecording = async () => {
     setIsRecording(true);
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
+    const mimeType = isSafari() ? 'audio/mp4' : 'audio/webm';
+    const options = { mimeType };
+    const mediaRecorder = new MediaRecorder(stream, options);
     mediaRecorderRef.current = mediaRecorder;
     mediaRecorder.start();
   };
@@ -50,10 +65,14 @@ const RecordSpeech = () => {
     setIsProcessing(true);
 
     try {
+      const audioBuffer = await blobToAudioBuffer(audioBlob);
+      const wavArrayBuffer = audioBufferToWav(audioBuffer);
+      const wavBlob = new Blob([wavArrayBuffer], { type: 'audio/wav' });
+
       const formData = new FormData();
       formData.append(
         'file',
-        new Blob([audioBlob], { type: 'audio/wav' }),
+        new Blob([wavBlob], { type: 'audio/wav' }),
         'audio.wav'
       );
 
@@ -76,6 +95,12 @@ const RecordSpeech = () => {
   };
 
   const stopRecording = () => {
+    if (!mediaRecorderRef.current) {
+      console.error('MediaRecorder is not initialized.');
+      setIsRecording(false);
+      return;
+    }
+
     setIsRecording(false);
     mediaRecorderRef.current.stop();
     mediaRecorderRef.current.addEventListener('dataavailable', (event) => {

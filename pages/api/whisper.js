@@ -19,7 +19,6 @@ export default withFileUpload(async (req, res) => {
   formData.append('file', createReadStream(file.filepath), 'audio.wav');
   formData.append('model', 'whisper-1');
   formData.append('language', 'en');
-  formData.append('prompt', 'the recorded audio is in english or hindi');
 
   const response = await fetch(
     'https://api.openai.com/v1/audio/transcriptions',
