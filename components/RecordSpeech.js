@@ -35,7 +35,6 @@ const RecordSpeech = () => {
   const mediaRecorderRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [textResponse, setTextResponse] = useState('');
-  const [audioDuration, setAudioDuration] = useState(0);
 
   const { onCopy } = useClipboard(textResponse);
   const toast = useToast();
