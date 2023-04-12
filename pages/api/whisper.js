@@ -40,7 +40,7 @@ export default withFileUpload(async (req, res) => {
   const { text, error } = await response.json();
   if (response.ok) {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.status(200).json({ text: text });
+    res.status(200).json({ text: text, lang: language });
   } else {
     console.log('OPEN AI ERROR:');
     console.log(error.message);
