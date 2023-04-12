@@ -10,7 +10,7 @@ export const config = {
 
 export default withFileUpload(async (req, res) => {
   const file = req.file;
-  const language = req.language;
+  const language = req.body.language;
 
   console.log('language: ', language);
 
