@@ -10,6 +10,10 @@ export const config = {
 
 export default withFileUpload(async (req, res) => {
   const file = req.file;
+  const language = req.language;
+
+  console.log('language: ', language);
+
   if (!file) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(400).send('No file uploaded');
@@ -18,6 +22,8 @@ export default withFileUpload(async (req, res) => {
   const formData = new FormData();
   formData.append('file', createReadStream(file.filepath), 'audio.wav');
   formData.append('model', 'whisper-1');
+
+  if (language) formData.append('language', language);
 
   const response = await fetch(
     'https://api.openai.com/v1/audio/transcriptions',
