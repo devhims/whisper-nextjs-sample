@@ -26,6 +26,10 @@ export default withFileUpload(async (req, res) => {
   const formData = new FormData();
   formData.append('file', createReadStream(file.filepath), 'audio.wav');
   formData.append('model', 'whisper-1');
+  formData.append(
+    'prompt',
+    'The transcript is about AVA: Adaptive Voice Assistant'
+  );
 
   if (language) formData.append('language', language);
 
