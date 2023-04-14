@@ -5,9 +5,9 @@ export const config = {
 };
 
 const handler = (req) => {
-  const { headers } = new NextRequest(req);
-  const userAgent = headers.get('user-agent');
-  return NextResponse.json({ userAgent });
+  return NextResponse.json({
+    name: `Hello from ${req.url}. I'm an edge function.`,
+  });
 };
 
 export default handler;
