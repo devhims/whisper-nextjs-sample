@@ -1,5 +1,5 @@
 import { withFileUpload } from 'next-multiparty';
-import fetch from 'node-fetch';
+import fs from 'fs-extra';
 
 export const config = {
   // Set the runtime to 'edge'
@@ -7,10 +7,6 @@ export const config = {
 };
 
 export default withFileUpload(async (req, res) => {
-  console.log('req.body: ', req.body);
-  console.log('req.fields: ', req.fields);
-  console.log('req', req);
-
   const file = req.file;
   const language = req.fields.language;
 
@@ -23,7 +19,9 @@ export default withFileUpload(async (req, res) => {
   }
 
   const formData = new FormData();
-  formData.append('file', file.stream, { filename: 'audio.wav' });
+  formData.append('file', fs.createReadStream(file.filepath), {
+    filename: 'audio.wav',
+  });
   formData.append('model', 'whisper-1');
   formData.append(
     'prompt',
