@@ -9,10 +9,6 @@ export const config = {
 };
 
 export default withFileUpload(async (req, res) => {
-  console.log('req.body: ', req.body);
-  console.log('req.fields: ', req.fields);
-  console.log('req', req);
-
   const file = req.file;
   const language = req.fields.language;
 
@@ -31,7 +27,7 @@ export default withFileUpload(async (req, res) => {
     'The transcript is about AVA: Adaptive Voice Assistant'
   );
 
-  if (language) formData.append('language', language);
+  if (language !== 'auto') formData.append('language', language);
 
   const response = await fetch(
     'https://api.openai.com/v1/audio/transcriptions',
