@@ -164,21 +164,22 @@ const RecordSpeech = () => {
   };
 
   return (
-    <Box w={'100vw'} h='auto' margin='0' padding='0' overflowY='auto'>
+    <Box w={'100vw'}>
       <PageCenter>
         <Stack
-          height='100%'
+          height='auto'
           width='100%'
           alignItems='center'
           justify={'center'}
           spacing={4}
         >
-          <VStack spacing={2}>
+          <VStack spacing={2} pt={7}>
             <Heading
               fontSize={{ base: '3xl', lg: '4xl' }}
               bgGradient='linear(to-r, teal.600, teal.400, teal.300, teal.400)'
               bgClip='text'
               letterSpacing='tight'
+              textAlign={'center'}
             >
               Whisper : Speech to Text
             </Heading>
@@ -188,6 +189,7 @@ const RecordSpeech = () => {
               letterSpacing='tight'
               mb='2'
               fontWeight={'semibold'}
+              textAlign={'center'}
             >
               {subText}
             </Heading>

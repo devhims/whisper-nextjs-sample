@@ -3,11 +3,13 @@ import { Center } from '@chakra-ui/react';
 const PageCenter = ({ children }) => {
   return (
     <Center
-      pos='fixed'
-      left='50%'
-      top='50%'
-      transform='translate(-50%, -50%)'
+      pos='absolute'
       flexDirection={'column'}
+      w={'100%'}
+      minH={'100vh'}
+      p={{ base: '2', md: '4' }}
+      overflowY='auto'
+      overflowX={'hidden'}
     >
       {children}
     </Center>
@@ -15,5 +17,3 @@ const PageCenter = ({ children }) => {
 };
 
 export default PageCenter;
-
-//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
