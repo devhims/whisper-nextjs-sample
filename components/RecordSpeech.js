@@ -173,7 +173,7 @@ const RecordSpeech = () => {
           justify={'center'}
           spacing={4}
         >
-          <VStack spacing={2} pt={7}>
+          <VStack spacing={2} pt={5}>
             <Heading
               fontSize={{ base: '3xl', lg: '4xl' }}
               bgGradient='linear(to-r, teal.600, teal.400, teal.300, teal.400)'
