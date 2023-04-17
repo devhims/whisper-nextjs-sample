@@ -39,10 +39,7 @@ const RecordSpeech = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingText, setProcessingText] = useState('');
   const [textResponse, setTextResponse] = useState('');
-  const [subText, setSubText] = useState({
-    translate: 'Translate audio into English text',
-    transcribe: 'Transcribe audio into input Language',
-  });
+  const [subText, setSubText] = useState('Translate audio into English text');
 
   const [operation, setOperation] = useState('translate');
 
@@ -74,6 +71,12 @@ const RecordSpeech = () => {
 
   const handleOperationChange = (e) => {
     setOperation(e.target.value);
+
+    if (e.target.value === 'translate') {
+      setSubText('Translate audio into English text');
+    } else if (e.target.value === 'transcribe') {
+      setSubText('Transcribe audio into input Language');
+    }
   };
 
   const startRecording = async () => {
@@ -186,7 +189,7 @@ const RecordSpeech = () => {
               mb='2'
               fontWeight={'semibold'}
             >
-              {subText.transcribe}
+              {subText}
             </Heading>
           </VStack>
           <Divider />
