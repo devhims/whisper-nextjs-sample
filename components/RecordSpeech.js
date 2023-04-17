@@ -10,10 +10,13 @@ import {
   useClipboard,
   useToast,
   Divider,
+  Flex,
+  FormControl,
+  Select,
 } from '@chakra-ui/react';
 
 import { CopyIcon, DeleteIcon } from '@chakra-ui/icons';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 import Recorder from './Recorder';
 import PageCenter from './PageCenter';
@@ -34,7 +37,16 @@ const RecordSpeech = () => {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingText, setProcessingText] = useState('');
   const [textResponse, setTextResponse] = useState('');
+  const [subText, setSubText] = useState({
+    translate: 'Translate audio into English text',
+    transcribe: 'Transcribe audio into input Language',
+  });
+
+  const [operation, setOperation] = useState('translate');
+
+  const maxRecordingTimeoutRef = useRef(null);
 
   const { onCopy } = useClipboard(textResponse);
   const toast = useToast();
@@ -50,17 +62,45 @@ const RecordSpeech = () => {
     onCopy();
   };
 
-  const startRecording = async () => {
-    setIsRecording(true);
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mimeType = isSafari() ? 'audio/mp4' : 'audio/webm';
-    const options = { mimeType };
-    const mediaRecorder = new MediaRecorder(stream, options);
-    mediaRecorderRef.current = mediaRecorder;
-    mediaRecorder.start();
+  useEffect(() => {
+    if (processingText === 'Max. recording limit crossed') {
+      setIsProcessing(true);
+    }
+
+    return () => {
+      clearTimeout(maxRecordingTimeoutRef.current);
+    };
+  }, [processingText]);
+
+  const handleOperationChange = (e) => {
+    setOperation(e.target.value);
   };
 
-  const uploadAudio = async (audioBlob) => {
+  const startRecording = async () => {
+    setIsRecording(true);
+    setProcessingText('');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = isSafari() ? 'audio/mp4' : 'audio/webm';
+      const options = { mimeType };
+      const mediaRecorder = new MediaRecorder(stream, options);
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+
+      // Set the 10-second timer
+      maxRecordingTimeoutRef.current = setTimeout(() => {
+        console.log('Max. recording limit reached');
+        setProcessingText('Max. recording limit crossed');
+        setIsRecording(false);
+        mediaRecorderRef.current.stop();
+      }, 10000);
+    } catch (error) {
+      console.error('Error during startRecording:', error);
+      setIsRecording(false);
+    }
+  };
+
+  const uploadAudio = async (audioBlob, errorCallback) => {
     setIsProcessing(true);
 
     try {
@@ -69,31 +109,34 @@ const RecordSpeech = () => {
       const wavBlob = new Blob([wavArrayBuffer], { type: 'audio/wav' });
 
       const formData = new FormData();
-      formData.append(
-        'file',
-        new Blob([wavBlob], { type: 'audio/wav' }),
-        'audio.wav'
+      formData.append('file', wavBlob, 'audio.wav');
+
+      const response = await fetch(
+        operation === 'translate' ? '/api/translations' : '/api/transcriptions',
+        {
+          method: 'POST',
+          body: formData,
+        }
       );
 
-      const response = await fetch('/api/whisper', {
-        method: 'POST',
-        body: formData,
-      });
-
       if (!response.ok) {
-        console.error(`API error: ${response.status} ${response.statusText}`);
+        errorCallback(`API error: ${response.status} ${response.statusText}`);
         return;
       }
 
       const data = await response.json();
       setTextResponse(data.text);
-      setIsProcessing(false);
     } catch (error) {
       console.error('Error during uploadAudio:', error);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const stopRecording = () => {
+    maxRecordingTimeoutRef.current &&
+      clearTimeout(maxRecordingTimeoutRef.current);
+
     if (!mediaRecorderRef.current) {
       console.error('MediaRecorder is not initialized.');
       setIsRecording(false);
@@ -101,10 +144,20 @@ const RecordSpeech = () => {
     }
 
     setIsRecording(false);
+    setProcessingText('Processing...');
     mediaRecorderRef.current.stop();
-    mediaRecorderRef.current.addEventListener('dataavailable', (event) => {
-      uploadAudio(event.data);
-    });
+
+    const onDataAvailable = (event) => {
+      uploadAudio(event.data, (error) => {
+        console.error(error);
+      });
+      mediaRecorderRef.current.removeEventListener(
+        'dataavailable',
+        onDataAvailable
+      );
+    };
+
+    mediaRecorderRef.current.addEventListener('dataavailable', onDataAvailable);
   };
 
   return (
@@ -133,10 +186,29 @@ const RecordSpeech = () => {
               mb='2'
               fontWeight={'semibold'}
             >
-              Translate Audio into English text
+              {subText.transcribe}
             </Heading>
           </VStack>
           <Divider />
+          <Flex w='100%' pb={5}>
+            <FormControl
+              display={'flex'}
+              flexDirection={'column'}
+              justify='center'
+              alignItems='center'
+            >
+              <Select
+                w='70%'
+                maxW='200px'
+                display='inline-block'
+                onChange={handleOperationChange}
+                defaultValue={operation}
+              >
+                <option value='translate'>Translate</option>
+                <option value='transcribe'>Transcribe</option>
+              </Select>
+            </FormControl>
+          </Flex>
           <SlideFade in={textResponse !== ''} offsetY='20px'>
             <Box
               w='80vw'
@@ -170,7 +242,7 @@ const RecordSpeech = () => {
             visibility={isProcessing ? 'visible' : 'hidden'}
             color='teal.600'
           >
-            Processing...
+            {processingText}
           </Text>
           <VStack spacing={0}>
             <Text fontWeight={'bold'} color='gray.600'>
